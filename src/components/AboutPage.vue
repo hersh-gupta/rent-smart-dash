@@ -26,7 +26,7 @@
         While the original RentSmart Boston dashboard providers users with a searchable experience, it is created as a
         Tableau dashboard embed. Embedded dashboards for public services leave much to be desired. This application is
         an effort to rebuid the dashboard using a web-first framework. The code for this project is available via an
-        open source license on <a href="https://github.com/hersh-gupta"
+        open source license on <a href="https://github.com/hersh-gupta/rent-smart-dash"
             class="underline text-optimistic-blue font-bold">GitHub</a>.
     </p>
     <h2 class="font-bold text-xl pb-5">About the Author</h2>
