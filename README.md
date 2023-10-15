@@ -2,7 +2,7 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/b956e949-9e81-46de-9c07-c098e392b917/deploy-status)](https://app.netlify.com/sites/rentsmartboston/deploys)
 
-!(Home Page Screenshot)[home-page.png]
+![Screenshot](home-page.png)
 
 The RentSmart Boston Dashboard is a housing violations search tool to help prospective tenants in Boston. 
 
