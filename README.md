@@ -38,4 +38,4 @@ Build all packages:
 `$ yarn build`
 
 ## License
-The source code in this repository is licensed under GNU GPL.
+The source code in this repository is licensed under [GNU GPLv3](https://github.com/hersh-gupta/rent-smart-dash/blob/main/LICENSE).
