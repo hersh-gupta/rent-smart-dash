@@ -6,7 +6,7 @@
       leave-active-class="transition duration-300" 
       leave-from-class="opacity-100"
       leave-to-class="opacity-0" >
-    <div v-if="record" class="flex flex-col pl-10 lg:basis-2/5 basis-2/3 bg-white border-charles-blue border-t-4 lg:border-t-0 lg:border-r-4 relative overflow-y-auto max-h-[86vh] pb-10">
+    <div v-if="record" class="flex flex-col pl-10 lg:basis-2/5 basis-2/3 bg-white border-charles-blue border-t-4 lg:border-t-0 lg:border-r-4 relative overflow-y-auto max-h-[86vh] pb-32 md:pb-10">
         <button class="absolute top-2 right-2" @click="closeRoute()">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

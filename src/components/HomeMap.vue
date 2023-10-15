@@ -39,6 +39,8 @@ export default {
                     center: lngLat,
                     zoom: 17, // You can adjust the zoom level
                     essential: true,
+                    offset: [-100, -100],
+                    speed: 2
                 });
 
                 if (!marker) {
