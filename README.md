@@ -1,5 +1,9 @@
 # RentSmart Boston Dashboard
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/b956e949-9e81-46de-9c07-c098e392b917/deploy-status)](https://app.netlify.com/sites/rentsmartboston/deploys)
+
+!(Home Page Screenshot)[home-page.png]
+
 The RentSmart Boston Dashboard is a housing violations search tool to help prospective tenants in Boston. 
 
 The City of Boston provides compiled data on housing violations, building violations, enforcement violations, housing complaints, sanitation requests, and/or civic maintenance requests. The City releases this data through [Analyze Boston](https://data.boston.gov/) and they provide a [Tableau dashboard](https://www.boston.gov/departments/analytics-team/rentsmart-boston) to allow users to search the data.
