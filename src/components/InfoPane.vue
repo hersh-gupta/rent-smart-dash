@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
       aria-modal="false"
       aria-labelledby="infopane-title"
       class="fixed z-40 bg-white shadow-2xl overflow-y-auto
-             inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl border-t-4 border-charles-blue
+             inset-x-0 bottom-0 max-h-[55vh] rounded-t-2xl border-t-4 border-charles-blue
              md:inset-x-auto md:bottom-auto md:top-24 md:right-4 md:w-[28rem] md:max-h-[calc(100vh-8rem)]
              md:rounded-lg md:border-4"
     >

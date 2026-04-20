@@ -148,7 +148,11 @@ function flyToSelected() {
 
   if (record && Number.isFinite(record.latitude) && Number.isFinite(record.longitude)) {
     const lngLat = [record.longitude, record.latitude]
-    map.flyTo({ center: lngLat, zoom: 17, essential: true, speed: 1.6 })
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches
+    const padding = isDesktop
+      ? { top: 0, bottom: 0, left: 0, right: 480 }
+      : { top: 0, bottom: Math.round(window.innerHeight * 0.55), left: 0, right: 0 }
+    map.flyTo({ center: lngLat, zoom: 17, essential: true, speed: 1.6, padding })
 
     if (!marker) {
       const el = document.createElement('div')

@@ -3,7 +3,6 @@ import { onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import HomeMap from './HomeMap.vue'
 import InfoPane from './InfoPane.vue'
-import FilterPanel from './FilterPanel.vue'
 import { useFilterStore } from '../stores/filterStore'
 
 const route = useRoute()
@@ -45,7 +44,6 @@ watch(
 
 <template>
   <div class="flex flex-col lg:flex-row w-full flex-1 min-h-0">
-    <FilterPanel class="lg:shrink-0" />
     <HomeMap />
     <InfoPane />
   </div>

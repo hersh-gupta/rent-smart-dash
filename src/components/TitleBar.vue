@@ -22,7 +22,7 @@ const recordStore = useRecordStore()
         />
         <span>
           <span class="block text-xl md:text-3xl font-bold">RentSmart Boston</span>
-          <span class="hidden md:block text-xs text-blue-4">Boston Open Data · 2021–present</span>
+          <span class="hidden md:block text-xs text-blue-4">Boston Open Data</span>
         </span>
       </router-link>
       <router-link
