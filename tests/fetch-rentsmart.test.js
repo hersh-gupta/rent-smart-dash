@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { CATEGORIES, groupByAddress, buildArtifacts } from '../scripts/fetch-rentsmart.mjs'
+import { CATEGORIES, RECENT_DAYS, groupByAddress, buildArtifacts } from '../scripts/fetch-rentsmart.mjs'
+
+const NOW = new Date('2026-04-20T12:00:00Z')
 
 const fixture = [
   {
@@ -10,6 +12,7 @@ const fixture = [
     latitude: '42.34',
     longitude: '-71.07',
     violation_type: 'Enforcement Violations',
+    date: '2026-04-10T00:00:00',
   },
   {
     address: '1 Main St, 02118',
@@ -19,6 +22,7 @@ const fixture = [
     latitude: '42.34',
     longitude: '-71.07',
     violation_type: 'Housing Complaints',
+    date: '2022-06-01T00:00:00',
   },
   {
     address: '2 Oak St, 02130',
@@ -28,6 +32,7 @@ const fixture = [
     latitude: '42.31',
     longitude: '-71.11',
     violation_type: 'Building Violations',
+    date: '2025-12-15T00:00:00',
   },
   {
     address: '3 Missing Coord St',
@@ -65,5 +70,19 @@ describe('fetch-rentsmart', () => {
       expect(match).toBeTruthy()
       expect(match.i).toBe(feature.id)
     }
+  })
+
+  it(`counts violations inside the last ${RECENT_DAYS} days into r`, () => {
+    const byAddr = groupByAddress(fixture, NOW)
+
+    // 2026-04-10 is within 90 days of 2026-04-20; 2022-06-01 is not.
+    expect(byAddr.get('1 Main St, 02118').r).toBe(1)
+    // 2025-12-15 is ~126 days before 2026-04-20, so not recent.
+    expect(byAddr.get('2 Oak St, 02130').r).toBe(0)
+
+    const { geojson } = buildArtifacts(byAddr)
+    const main = geojson.features.find((f) => f.properties.a === '1 Main St, 02118')
+    expect(main.properties.r).toBe(1)
+    expect(main.properties.t).toBe(2)
   })
 })

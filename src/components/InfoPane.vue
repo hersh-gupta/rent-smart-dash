@@ -2,24 +2,69 @@
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRecordStore } from '../stores/recordStore'
+import { useDataStore } from '../stores/dataStore'
 import { CATEGORIES } from '../lib/categories'
+import { RECENT_DAYS, countRecent } from '../lib/recency'
 
 const recordStore = useRecordStore()
+const dataStore = useDataStore()
 const router = useRouter()
 
 const record = computed(() => recordStore.selectedRecord)
 const loading = computed(() => recordStore.detailsLoading)
 const error = computed(() => recordStore.detailsError)
 
+const ownerProperties = computed(() => {
+  const owner = record.value?.owner
+  const currentAddress = record.value?.address
+  if (!owner || !dataStore.geojson) return []
+  const out = []
+  for (const f of dataStore.geojson.features) {
+    if (f.properties.o !== owner) continue
+    if (f.properties.a === currentAddress) continue
+    out.push({
+      id: f.id,
+      address: f.properties.a,
+      neighborhood: f.properties.n,
+      propertyType: f.properties.p,
+      total: f.properties.t || 0,
+      recent: f.properties.r || 0,
+      longitude: f.geometry.coordinates[0],
+      latitude: f.geometry.coordinates[1],
+    })
+  }
+  out.sort(
+    (a, b) =>
+      b.recent - a.recent ||
+      b.total - a.total ||
+      a.address.localeCompare(b.address)
+  )
+  return out
+})
+
+function selectOtherProperty(item) {
+  recordStore.setSelectedRecord({
+    address: item.address,
+    neighborhood: item.neighborhood,
+    owner: record.value?.owner || '',
+    property_type: item.propertyType,
+    latitude: item.latitude,
+    longitude: item.longitude,
+  })
+  recordStore.loadDetailsForAddress(item.address)
+  const slug = item.address.trim().replace(/\W+/g, '-').replace(/^-|-$/g, '').toLowerCase()
+  router.push({ name: 'SearchAddress', params: { address: slug }, query: router.currentRoute.value.query })
+}
+
 const closeButton = ref(null)
 let previouslyFocused = null
 
 const sections = computed(() => {
   if (!record.value) return []
-  return CATEGORIES.map((name) => ({
-    name,
-    items: record.value[name] || [],
-  }))
+  return CATEGORIES.map((name) => {
+    const items = record.value[name] || []
+    return { name, items, recent: countRecent(items) }
+  })
 })
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
@@ -44,6 +89,10 @@ const totalViolations = computed(() =>
 
 const activeCategories = computed(() =>
   sections.value.reduce((n, s) => n + (s.items.length > 0 ? 1 : 0), 0)
+)
+
+const totalRecent = computed(() =>
+  sections.value.reduce((sum, s) => sum + s.recent, 0)
 )
 
 function closeRoute() {
@@ -148,13 +197,21 @@ onBeforeUnmount(() => {
           </template>
         </dl>
 
-        <div v-if="!loading && !error" class="mt-4 flex items-baseline gap-3">
+        <div v-if="!loading && !error" class="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-2">
           <span class="font-serif text-3xl font-bold text-freedom-red tabular-nums">
             {{ totalViolations }}
           </span>
           <span class="font-sans text-xs text-gray-1">
             violation{{ totalViolations === 1 ? '' : 's' }}
             across {{ activeCategories }} categor{{ activeCategories === 1 ? 'y' : 'ies' }}
+          </span>
+          <span
+            v-if="totalRecent > 0"
+            class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-freedom-red text-white font-sans text-xs font-bold uppercase tracking-wide"
+            :title="`${totalRecent} in the last ${RECENT_DAYS} days`"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse" aria-hidden="true"></span>
+            {{ totalRecent }} in last {{ RECENT_DAYS }}d
           </span>
         </div>
       </header>
@@ -211,10 +268,19 @@ onBeforeUnmount(() => {
                     {{ section.name }}
                   </h2>
                 </span>
-                <span
-                  class="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-2 rounded-full bg-freedom-red text-white text-xs font-sans font-bold tabular-nums"
-                >
-                  {{ section.items.length }}
+                <span class="flex items-center gap-2">
+                  <span
+                    v-if="section.recent > 0"
+                    class="font-sans text-xs font-bold uppercase tracking-wide text-freedom-red tabular-nums"
+                    :title="`${section.recent} in the last ${RECENT_DAYS} days`"
+                  >
+                    {{ section.recent }} recent
+                  </span>
+                  <span
+                    class="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-2 rounded-full bg-freedom-red text-white text-xs font-sans font-bold tabular-nums"
+                  >
+                    {{ section.items.length }}
+                  </span>
                 </span>
               </summary>
 
@@ -254,6 +320,73 @@ onBeforeUnmount(() => {
             </div>
           </li>
         </ul>
+
+        <section v-if="record && record.owner && ownerProperties.length" class="mt-6">
+          <details open class="group">
+            <summary
+              class="flex items-center justify-between border-b border-charles-blue pb-2 cursor-pointer select-none"
+            >
+              <span class="flex items-center gap-2">
+                <svg
+                  class="w-4 h-4 text-charles-blue transition-transform group-open:rotate-90"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+                <h2 class="font-serif text-sm font-bold text-charles-blue">
+                  Other properties by this owner
+                </h2>
+              </span>
+              <span
+                class="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-2 rounded-full bg-optimistic-blue text-white text-xs font-sans font-bold tabular-nums"
+              >
+                {{ ownerProperties.length }}
+              </span>
+            </summary>
+            <ul class="mt-2 divide-y divide-gray-3">
+              <li
+                v-for="item in ownerProperties"
+                :key="item.id"
+              >
+                <button
+                  type="button"
+                  class="w-full grid grid-cols-[1fr_auto] gap-3 py-2 text-left hover:bg-gray-4 focus:bg-gray-4 focus:outline-none"
+                  @click="selectOtherProperty(item)"
+                >
+                  <span class="min-w-0">
+                    <span class="block font-serif text-sm font-bold text-optimistic-blue leading-snug underline truncate">
+                      {{ item.address }}
+                    </span>
+                    <span class="block font-sans text-xs text-gray-1 truncate">
+                      {{ item.neighborhood || 'Boston' }}
+                    </span>
+                  </span>
+                  <span class="flex items-center gap-2">
+                    <span
+                      v-if="item.recent > 0"
+                      class="font-sans text-xs font-bold uppercase tracking-wide text-freedom-red tabular-nums"
+                      :title="`${item.recent} in the last ${RECENT_DAYS} days`"
+                    >
+                      {{ item.recent }} recent
+                    </span>
+                    <span
+                      class="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-2 rounded-full text-xs font-sans font-bold tabular-nums"
+                      :class="item.total > 0 ? 'bg-freedom-red text-white' : 'bg-gray-3 text-gray-1'"
+                      :title="`${item.total} violation${item.total === 1 ? '' : 's'}`"
+                    >
+                      {{ item.total }}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </details>
+        </section>
       </div>
     </div>
   </Transition>

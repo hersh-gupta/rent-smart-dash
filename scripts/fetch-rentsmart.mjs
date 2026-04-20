@@ -24,6 +24,18 @@ const CATEGORIES = [
 ]
 const CATEGORY_INDEX = new Map(CATEGORIES.map((name, i) => [name, i]))
 
+// Mirrors RECENT_DAYS in src/lib/recency.js.
+const RECENT_DAYS = 90
+
+function recentCutoffISO(now) {
+  const d = new Date(now)
+  d.setDate(d.getDate() - RECENT_DAYS)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PUBLIC_DIR = resolve(__dirname, '..', 'public')
 
@@ -49,7 +61,8 @@ async function fetchAllRecords() {
   return all
 }
 
-function groupByAddress(rows) {
+function groupByAddress(rows, now = new Date()) {
+  const cutoff = recentCutoffISO(now)
   const byAddr = new Map()
   for (const row of rows) {
     const address = row.address
@@ -69,6 +82,7 @@ function groupByAddress(rows) {
         lng,
         counts: new Array(CATEGORIES.length).fill(0),
         t: 0,
+        r: 0,
       }
       byAddr.set(address, entry)
     }
@@ -77,6 +91,9 @@ function groupByAddress(rows) {
     if (ci !== undefined) {
       entry.counts[ci]++
       entry.t++
+      if (typeof row.date === 'string' && row.date.slice(0, 10) >= cutoff) {
+        entry.r++
+      }
     }
   }
   return byAddr
@@ -93,6 +110,7 @@ function buildArtifacts(byAddr) {
       o: entry.o,
       p: entry.p,
       t: entry.t,
+      r: entry.r,
     }
     for (let i = 0; i < CATEGORIES.length; i++) {
       properties[String(i)] = entry.counts[i]
@@ -122,7 +140,8 @@ async function main() {
   const rows = await fetchAllRecords()
   process.stderr.write(`Total rows: ${rows.length}\n`)
 
-  const byAddr = groupByAddress(rows)
+  const now = new Date()
+  const byAddr = groupByAddress(rows, now)
   process.stderr.write(`Unique addresses: ${byAddr.size}\n`)
 
   const { geojson, addresses } = buildArtifacts(byAddr)
@@ -130,17 +149,19 @@ async function main() {
   await writeJson(resolve(PUBLIC_DIR, 'points.geojson'), geojson)
   await writeJson(resolve(PUBLIC_DIR, 'addresses.json'), addresses)
   await writeJson(resolve(PUBLIC_DIR, 'data-version.json'), {
-    built_at: new Date().toISOString(),
+    built_at: now.toISOString(),
     source_row_count: rows.length,
     address_count: addresses.length,
     resource_id: RESOURCE_ID,
+    recent_days: RECENT_DAYS,
+    recent_cutoff: recentCutoffISO(now),
   })
 
   process.stderr.write('Wrote points.geojson, addresses.json, data-version.json\n')
 }
 
 // Export internals for tests. Only runs main when executed directly.
-export { CATEGORIES, groupByAddress, buildArtifacts }
+export { CATEGORIES, RECENT_DAYS, groupByAddress, buildArtifacts }
 
 const entry = process.argv[1] ? pathToFileURL(process.argv[1]).href : ''
 if (import.meta.url === entry) {
