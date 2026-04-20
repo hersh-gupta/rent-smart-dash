@@ -1,0 +1,22 @@
+[build]
+  command = "yarn build"
+  publish = "dist"
+
+# CKAN data is fetched at build time and written to public/ by scripts/fetch-rentsmart.mjs
+# (wired as the `prebuild` script). These cache headers mean a CDN hit is instant,
+# browsers revalidate hourly, and the data-version.json is always fresh.
+
+[[headers]]
+  for = "/points.geojson"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/addresses.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/data-version.json"
+  [headers.values]
+    Cache-Control = "public, max-age=60, s-maxage=300, stale-while-revalidate=3600"

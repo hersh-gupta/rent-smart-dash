@@ -14,7 +14,8 @@
             <span class="font-bold text-freedom-red"> It is not an official City of Boston data product.</span>
             The purpose of RentSmart Boston is to allow users to search an address in the City of Boston's <a
                 class="underline text-optimistic-blue font-bold" href="https://data.boston.gov/dataset/rentsmart">RentSmart
-                dataset</a>:
+                dataset</a>. The data covers <strong>2021 to present</strong> and is refreshed daily from
+            <a class="underline text-optimistic-blue font-bold" href="https://data.boston.gov/">Boston Open Data</a>.
         </p>
         <p class="font-serif italic mb-5 ml-1 pl-2 border-l-4 border-l-charles-blue">RentSmart Boston compiles data from
             BOS:311 and the City's Inspectional Services Division to give prospective tenants a more complete picture of the
