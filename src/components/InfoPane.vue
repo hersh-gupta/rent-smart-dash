@@ -190,7 +190,16 @@ onBeforeUnmount(() => {
 
         <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm font-sans">
           <dt class="text-gray-1 font-bold">Owner</dt>
-          <dd class="text-charles-blue">{{ record.owner || '—' }}</dd>
+          <dd class="text-charles-blue">
+            <router-link
+              v-if="record.owner"
+              :to="{ name: 'Owner', params: { name: record.owner } }"
+              class="text-optimistic-blue font-bold underline hover:no-underline"
+            >
+              {{ record.owner }}
+            </router-link>
+            <span v-else>—</span>
+          </dd>
           <template v-if="record.property_type">
             <dt class="text-gray-1 font-bold">Type</dt>
             <dd class="text-charles-blue">{{ record.property_type }}</dd>

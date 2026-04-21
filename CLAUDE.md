@@ -24,7 +24,7 @@ Package manager is **yarn** (see `yarn.lock`).
 
 Single-page Vue 3 app (Composition API, Vite, Tailwind, Pinia, vue-router) for browsing Boston housing-violation records on a clustered Mapbox map. Data covers **2021–present** and refreshes daily via a Netlify build hook triggered by GitHub Actions.
 
-**Entry / routing** (`src/main.js`): `/` and `/address/:address` render `HomeBody`; `/about` renders `AboutPage`; catch-all `PageNotFound`. `App.vue` renders `TitleBar` + `<router-view>`. Filter state is synced to query params (`?cat=`, `?nbhd=`, `?owner=`) via `router.replace`.
+**Entry / routing** (`src/main.js`): `/` and `/address/:address` render `HomeBody`; `/owner/:name` renders `OwnerPage`; `/about` renders `AboutPage`; catch-all `PageNotFound`. `App.vue` renders `TitleBar` + `<router-view>`. Filter state is synced to query params (`?cat=`, `?nbhd=`, `?owner=`) via `router.replace`.
 
 **Layout**: `HomeBody` stacks `FilterPanel` (left drawer on desktop, collapsible bar on mobile) beside a flex pair of `InfoPane` (conditional) and `HomeMap` (always mounted). `TitleBar` hosts `SearchBar`.
 
@@ -53,8 +53,9 @@ Category order is **fixed** in `src/lib/categories.js` and shared with `scripts/
 
 - `HomeMap.vue` — `<script setup>`. Clustered GeoJSON source + three layers (clusters, cluster counts, unclustered points). Click a cluster to zoom; click a point to select the address (calls `recordStore.setSelectedRecord` + `loadDetailsForAddress`).
 - `SearchBar.vue` — autocomplete against `dataStore.addresses`, filtered through `filterStore.matchesFeature`. `role="combobox"` + arrow-key nav + Esc.
-- `InfoPane.vue` — renders the six category sections. Skeleton while `detailsLoading`, error banner with Retry on `detailsError`. Focus moves to the close button on open; Esc closes; focus returns to the triggering element.
+- `InfoPane.vue` — renders the six category sections. Skeleton while `detailsLoading`, error banner with Retry on `detailsError`. Focus moves to the close button on open; Esc closes; focus returns to the triggering element. The owner field is a `router-link` to `/owner/:name`.
 - `FilterPanel.vue` — category checkboxes with totals, neighborhood dropdown, owner substring filter. Collapsible on mobile.
+- `OwnerPage.vue` — dedicated `/owner/:name` page. Aggregates per-owner from `dataStore.geojson` (property count, total + recent violations, per-category rollup, neighborhood distribution) plus its own Mapbox instance with per-property markers. Recent-violation feed (last `RECENT_DAYS`) comes from a live CKAN `datastore_search_sql` query scoped to `owner = :name`. Clicking a property calls `recordStore.setSelectedRecord` + `loadDetailsForAddress` and routes back to `SearchAddress` so InfoPane hydrates on Home.
 - `TitleBar.vue`, `AboutPage.vue`, `PageNotFound.vue` — copy mentions 2021–present and daily Boston Open Data refresh.
 
 ### Styling

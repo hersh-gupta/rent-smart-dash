@@ -3,6 +3,7 @@ import './style.css'
 import App from './App.vue'
 import AboutPage from './components/AboutPage.vue'
 import HomeBody from './components/HomeBody.vue'
+import OwnerPage from './components/OwnerPage.vue'
 import TitleBar from './components/TitleBar.vue'
 import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -19,7 +20,12 @@ const routes = [
         name: 'SearchAddress',
         component: HomeBody
     },
-    { 
+    {
+        path: '/owner/:name',
+        name: 'Owner',
+        component: OwnerPage
+    },
+    {
         path: '/about',
         name: 'About',
         component: AboutPage
